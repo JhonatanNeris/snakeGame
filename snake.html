@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+        #modalGameOver{
+            height: 100vh;
+            width: 100vw;
+            background-color: rgba(0, 0, 0, 0.5);
+            position: fixed;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #modalGameOver button{
+            padding: 8px 16px;
+            background-color: rebeccapurple;
+            color: white;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 7px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="score">Score: 0</h1>
+    <canvas id="snakeCanvas" width="500" height="500"></canvas>
+    <div id="modalGameOver">
+        <button onclick="">Reiniciar</button>
+    </div>
+    <script>
+        const modal = document.getElementById("modalGameOver")
+        const canvas = document.getElementById("snakeCanvas");
+        const context = canvas.getContext("2d");
+        const gridSize = 20;
+        const score = document.getElementById("score")
+        var scoreValue = 0
+
+
+        let snake = [{ x: 3, y: 3 }];
+        let direction = "right";
+        let food = { x: 10, y: 10 };
+
+
+        function drawSnake() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < snake.length; i++) {
+                context.fillStyle = i === 0 ? "#00f" : "#0f0";
+                context.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize, gridSize);
+            }
+        }
+
+
+        function drawFood() {
+            context.fillStyle = "#f00";
+            context.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+
+        function update() {
+            const head = { ...snake[0] };
+
+
+            switch (direction) {
+                case "up":
+                    head.y -= 1;
+                    break;
+                case "down":
+                    head.y += 1;
+                    break;
+                case "left":
+                    head.x -= 1;
+                    break;
+                case "right":
+                    head.x += 1;
+                    break;
+            }
+
+
+            snake.unshift(head);
+
+
+            if (head.x === food.x && head.y === food.y) {
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                    y: Math.floor(Math.random() * (canvas.height / gridSize)),
+                };
+                scoreValue += 1;
+                score.innerHTML= "Score: " + scoreValue
+            } else {
+                snake.pop();
+            }
+        }
+
+
+        function checkCollision() {
+            const head = snake[0];
+
+
+            // Verificar colisão com as bordas do canvas
+            if (
+                head.x < 0 || head.x >= canvas.width / gridSize ||
+                head.y < 0 || head.y >= canvas.height / gridSize
+            ) {
+                gameOver();
+            }
+
+
+            // Verificar colisão da cabeça com o próprio corpo
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                }
+            }
+        }
+       
+        function openModal(){
+            modal.style.display = flex;
+        }
+
+
+
+
+        function gameOver() {
+            alert("Game Over! Pontuação: " + (snake.length - 1));
+            snake = [{ x: 3, y: 3 }]; // Reiniciar a cobra
+            direction = "right";
+            scoreValue = 0;
+            score.innerHTML= "Score: " + scoreValue
+            food = { x: 10, y: 10 }; // Gerar nova comida
+        }
+
+
+       
+        function gameLoop() {
+            drawSnake();
+            drawFood();
+            update();
+            checkCollision(); // Verificar colisões
+            setTimeout(gameLoop, 100);
+        }
+
+
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "ArrowUp":
+                    direction = "up";
+                    break;
+                case "ArrowDown":
+                    direction = "down";
+                    break;
+                case "ArrowLeft":
+                    direction = "left";
+                    break;
+                case "ArrowRight":
+                    direction = "right";
+                    break;
+            }
+        });
+
+
+        gameLoop();
+    </script>
+</body>
+</html>
